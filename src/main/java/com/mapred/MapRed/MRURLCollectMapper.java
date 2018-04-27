@@ -8,7 +8,6 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import entity.RecordContent;
 import entity.RecordHeader;
-import parser.ContentParserGZIP;
 
 public class MRURLCollectMapper extends Mapper<RecordHeader, RecordContent, Text, Text> {
 
