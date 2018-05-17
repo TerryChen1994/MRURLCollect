@@ -83,12 +83,13 @@ public class MRURLCollectMultyJob {
 				curS = "0" + curS;
 			}
 			String curPath = prePath + curS + "wb";
-			if (i != sum) {
+			if (i != sum - 1) {
 				allPath = allPath + curPath + ",";
 			} else {
 				allPath = allPath + curPath;
 			}
 		}
+//		System.out.println("sNum = " + sNum + " sum = " + sum + " allPath = " + allPath);
 		FileInputFormat.addInputPaths(job, allPath);
 		FileOutputFormat.setOutputPath(job, new Path("/user/s1721710/URLs/output" + sNum));
 		FileOutputFormat.setCompressOutput(job, true); // job使用压缩
