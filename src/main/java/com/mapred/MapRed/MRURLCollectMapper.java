@@ -1,6 +1,5 @@
 package com.mapred.MapRed;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Text;
@@ -16,7 +15,7 @@ public class MRURLCollectMapper extends Mapper<RecordHeader, RecordContent, Text
 		long heartBeatInterval = 100000L; // 主动发心跳的间隔，100s，默认600s超时
 
 		try {
-			context.write(new Text(key.getWarcTargetUri()), new Text(""));
+			context.write(new Text(key.getWarcTargetUri()), new Text(key.getWarcRecordId()));
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

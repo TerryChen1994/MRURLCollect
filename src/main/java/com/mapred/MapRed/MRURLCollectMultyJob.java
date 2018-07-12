@@ -35,7 +35,7 @@ public class MRURLCollectMultyJob {
 			cjobList[i].addDependingJob(cjobList[i - 1]);
 		}
 
-		JobControl jc = new JobControl("MRURLCollect from 00 to 19");
+		JobControl jc = new JobControl("MRURLIDCollect from 00 to 19");
 		for (int i = 0; i < 20; i++) {
 			jc.addJob(cjobList[i]);
 		}
@@ -67,7 +67,7 @@ public class MRURLCollectMultyJob {
 
 		Job job = Job.getInstance(conf);
 		job.setJarByClass(MRURLCollectMultyJob.class);
-		job.setJobName("MRURLCollect" + sNum);
+		job.setJobName("MRURLIDCollect" + sNum);
 
 		job.setNumReduceTasks(100);
 
@@ -91,7 +91,7 @@ public class MRURLCollectMultyJob {
 		}
 //		System.out.println("sNum = " + sNum + " sum = " + sum + " allPath = " + allPath);
 		FileInputFormat.addInputPaths(job, allPath);
-		FileOutputFormat.setOutputPath(job, new Path("/user/s1721710/URLs/output" + sNum));
+		FileOutputFormat.setOutputPath(job, new Path("/user/s1721710/URLIDs/output" + sNum));
 		FileOutputFormat.setCompressOutput(job, true); // job使用压缩
 		FileOutputFormat.setOutputCompressorClass(job, GzipCodec.class);
 
