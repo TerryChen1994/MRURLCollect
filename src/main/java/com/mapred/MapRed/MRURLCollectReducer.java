@@ -1,22 +1,31 @@
 package com.mapred.MapRed;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.Iterator;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
-public class MRURLCollectReducer extends Reducer<Text, Text, Text, Text> {
-	public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-		long lastProgressTS = 0; // 上一次发心跳的时间点
-		long heartBeatInterval = 100000L; // 主动发心跳的间隔，100s，默认600s超时
-		for(Text value : values){
-			context.write(key,value);
 
-			if (System.currentTimeMillis() - lastProgressTS > heartBeatInterval) {
-				context.progress();
-				lastProgressTS = System.currentTimeMillis();
+import entity.TextPair;
+public class MRURLCollectReducer extends Reducer<TextPair, Text, Text, Text> {
+	public void reduce(TextPair key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+
+		Iterator<Text> iter = values.iterator();
+		Text tUrl = new Text(iter.next());
+		if(iter.hasNext()){
+			Text tPagerank = new Text(iter.next());
+			try{
+				URL url = new URL(tUrl.toString());
+				url.getAuthority();
+				double pagerank = Double.parseDouble(tPagerank.toString());
+			} catch (Exception e){
+				e.printStackTrace();
 			}
+			
+			String outputValue = key.getFirst().toString() + "\t" + tPagerank.toString();
+			context.write(tUrl, new Text(outputValue));
 		}
-		
 
 	}
 }

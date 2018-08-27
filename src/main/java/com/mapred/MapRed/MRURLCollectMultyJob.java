@@ -6,14 +6,26 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.Partitioner;
+import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+import entity.TextPair;
 import inputformat.RecordInputFormat;
 
 public class MRURLCollectMultyJob {
+	public static class KeyPartitioner extends Partitioner<TextPair, Text> {
+
+		@Override
+		public int getPartition(TextPair key, Text value, int numPartitions) {
+			// TODO Auto-generated method stub
+			return (key.getFirst().hashCode() & Integer.MAX_VALUE) % numPartitions;
+		}
+
+	}
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
 		conf.setBoolean("mapred.compress.map.output", true);
@@ -35,7 +47,7 @@ public class MRURLCollectMultyJob {
 			cjobList[i].addDependingJob(cjobList[i - 1]);
 		}
 
-		JobControl jc = new JobControl("MRURLIDCollect from 00 to 19");
+		JobControl jc = new JobControl("MRUrlIdPagerankCollector from 00 to 19");
 		for (int i = 0; i < 20; i++) {
 			jc.addJob(cjobList[i]);
 		}
@@ -67,13 +79,12 @@ public class MRURLCollectMultyJob {
 
 		Job job = Job.getInstance(conf);
 		job.setJarByClass(MRURLCollectMultyJob.class);
-		job.setJobName("MRURLIDCollect" + sNum);
+		job.setJobName("MRUrlIdPageRankCollector" + sNum);
 
 		job.setNumReduceTasks(100);
 
 		String disk = getDisk(num);
 		String prePath = "/user/terrier/ClueWeb12/Corpus/" + disk + "/ClueWeb12_" + sNum + "/" + sNum;
-		String allPath = new String();
 
 		int sum = getSum(num);
 
@@ -83,21 +94,20 @@ public class MRURLCollectMultyJob {
 				curS = "0" + curS;
 			}
 			String curPath = prePath + curS + "wb";
-			if (i != sum - 1) {
-				allPath = allPath + curPath + ",";
-			} else {
-				allPath = allPath + curPath;
-			}
+			MultipleInputs.addInputPath(job, new Path(curPath), RecordInputFormat.class, MRURLCollectMapper.class);
 		}
-//		System.out.println("sNum = " + sNum + " sum = " + sum + " allPath = " + allPath);
-		FileInputFormat.addInputPaths(job, allPath);
-		FileOutputFormat.setOutputPath(job, new Path("/user/s1721710/URLIDs/output" + sNum));
+		
+		Path pagerankPath = new Path("/user/s1721710/pagerank.docNameOrder");
+		MultipleInputs.addInputPath(job, pagerankPath, TextInputFormat.class, MRPageRankCollectMapper.class);
+		
+		FileOutputFormat.setOutputPath(job, new Path("/user/s1721710/UrlIdPagerankIndex/output" + sNum));
 		FileOutputFormat.setCompressOutput(job, true); // job使用压缩
 		FileOutputFormat.setOutputCompressorClass(job, GzipCodec.class);
+		
+		job.setPartitionerClass(KeyPartitioner.class);
+		job.setGroupingComparatorClass(TextPair.FirstComparator.class);
 
-		job.setMapperClass(MRURLCollectMapper.class);
-		job.setInputFormatClass(RecordInputFormat.class);
-
+		job.setMapOutputKeyClass(TextPair.class);
 		job.setReducerClass(MRURLCollectReducer.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(Text.class);
