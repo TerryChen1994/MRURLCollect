@@ -91,7 +91,7 @@ public class MRURLCollectMultyJob {
 		}
 //		System.out.println("sNum = " + sNum + " sum = " + sum + " allPath = " + allPath);
 		FileInputFormat.addInputPaths(job, allPath);
-		FileOutputFormat.setOutputPath(job, new Path("/user/s1721710/URLIDs/output" + sNum));
+		FileOutputFormat.setOutputPath(job, new Path("/user/s1721710/UrlIdIndex/output" + sNum));
 		FileOutputFormat.setCompressOutput(job, true); // job使用压缩
 		FileOutputFormat.setOutputCompressorClass(job, GzipCodec.class);
 
