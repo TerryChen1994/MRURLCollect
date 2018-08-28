@@ -16,7 +16,7 @@ public class MRURLCollectMapper extends Mapper<RecordHeader, RecordContent, Text
 		long heartBeatInterval = 100000L; // 主动发心跳的间隔，100s，默认600s超时
 
 		try {
-			context.write(new TextPair(key.getWarcRecordId(), "0"), new Text(key.getWarcTargetUri()));
+			context.write(new TextPair(key.getWarcTrecId(), "0"), new Text(key.getWarcTargetUri()));
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
